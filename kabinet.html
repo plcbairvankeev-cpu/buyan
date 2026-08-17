@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Личный кабинет · Буян</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="assets/app.css?v=2">
+<link rel="stylesheet" href="assets/app.css?v=3">
 </head>
 <body>
 <header class="app-header">
@@ -118,22 +118,24 @@
         <form id="jobForm" class="card" style="margin:18px 0;display:grid;gap:12px">
           <strong>Разместить вакансию или подработку</strong>
           <div class="field" style="margin:0"><label for="jo-title">Что за работа</label><input id="jo-title" required></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
             <div class="field" style="margin:0"><label for="jo-kind">Тип</label>
               <select id="jo-kind"><option>Подработка</option><option>Вакансия</option></select></div>
             <div class="field" style="margin:0"><label for="jo-pay">Оплата</label><input id="jo-pay" placeholder="напр. 2000 ₽/смена"></div>
+            <div class="field" style="margin:0"><label for="jo-term">Актуально</label>
+              <select id="jo-term"><option value="7">1 неделя</option><option value="14">2 недели</option><option value="30" selected>1 месяц</option><option value="90">3 месяца</option></select></div>
           </div>
           <div class="field" style="margin:0"><label for="jo-desc">Описание</label><input id="jo-desc" placeholder="Что делать, условия, график"></div>
           <div><button class="btn btn--gold" type="submit" style="padding:.55rem 1.1rem;font-size:.88rem">Разместить</button>
             <span id="jobMsg" class="muted" style="margin-left:12px;font-size:.85rem"></span></div>
         </form>
 
-        <div class="table-scroll">
-          <table class="tablelike">
-            <thead><tr><th>Работа</th><th>Тип</th><th>Оплата</th><th></th></tr></thead>
-            <tbody id="jobsBody"><tr><td colspan="4" class="muted">Загрузка…</td></tr></tbody>
-          </table>
+        <div class="jobfilter" id="jobFilter">
+          <button type="button" data-jf="all" class="on">Все</button>
+          <button type="button" data-jf="Вакансия">Вакансии</button>
+          <button type="button" data-jf="Подработка">Подработки</button>
         </div>
+        <div id="jobsList"><p class="muted">Загрузка…</p></div>
       </section>
     </div>
   </main>
@@ -147,7 +149,8 @@
   var A = window.BuyanAuth;
   var sb = A.getClient ? A.getClient() : null;   // supabase-клиент (null в демо/без настройки)
   var $ = function (id) { return document.getElementById(id); };
-  var uid = null;
+  var uid = null, myEmail = null;
+  var allJobs = [], respByJob = {}, jobFilter = "all";
 
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function fmtDate(d){ if(!d) return "—"; var p=String(d).split("-"); return p.length===3 ? p[2]+"."+p[1]+"."+p[0] : d; }
@@ -155,6 +158,7 @@
   // Защита + шапка/профиль
   A.requireAuth("vhod.html").then(function (u) {
     if (!u) return;
+    myEmail = u.email;
     $("userName").textContent = u.email;
     $("profEmail").textContent = u.email;
     var letter = (u.email || "Б").trim().charAt(0).toUpperCase();
@@ -227,23 +231,68 @@
 
   function loadJobs(){
     Promise.all([
-      sb.from("jobs").select("id,title,kind,pay,description,author_id").order("created_at",{ascending:false}),
-      sb.from("job_responses").select("job_id")
+      sb.from("jobs").select("id,title,kind,pay,description,expires_at,author_id").order("created_at",{ascending:false}),
+      sb.from("job_responses").select("job_id,user_id,message,responder_email,created_at")
     ]).then(function(res){
-      var jb=res[0], rs=res[1], body=$("jobsBody");
-      if (jb.error){ body.innerHTML='<tr><td colspan="4" class="muted">'+esc(jb.error.message)+'</td></tr>'; return; }
-      if (!jb.data.length){ body.innerHTML='<tr><td colspan="4" class="muted">Пока нет вакансий — разместите первую.</td></tr>'; return; }
-      var mine={}; (rs.data||[]).forEach(function(x){ mine[x.job_id]=true; });
-      body.innerHTML = jb.data.map(function(j){
-        var act;
-        if (j.author_id===uid) act='<span class="pill">ваша</span>';
-        else if (mine[j.id]) act='<span class="pill" style="color:var(--gold-2);border-color:var(--gold-deep)">отклик отправлен</span>';
-        else act='<button class="btn btn--ghost" data-respond="'+j.id+'" style="padding:.4rem .8rem;font-size:.8rem">Откликнуться</button>';
-        var desc = j.description ? '<div class="muted" style="font-size:.82rem;margin-top:3px">'+esc(j.description)+'</div>' : '';
-        return '<tr><td>'+esc(j.title)+desc+'</td><td><span class="pill">'+esc(j.kind||"")+'</span></td><td>'+esc(j.pay||"—")+'</td><td>'+act+'</td></tr>';
-      }).join("");
+      var jb=res[0], rs=res[1];
+      if (jb.error){ $("jobsList").innerHTML='<p class="muted">'+esc(jb.error.message)+'</p>'; return; }
+      allJobs = jb.data || [];
+      respByJob = {};
+      (rs.data||[]).forEach(function(x){ (respByJob[x.job_id]=respByJob[x.job_id]||[]).push(x); });
+      renderJobs();
     });
   }
+
+  function renderJobs(){
+    var el=$("jobsList");
+    var list = allJobs.filter(function(j){ return jobFilter==="all" || j.kind===jobFilter; });
+    if (!list.length){ el.innerHTML='<p class="muted">'+(allJobs.length?"В этой категории пусто.":"Пока нет вакансий — разместите первую.")+'</p>'; return; }
+    var today = new Date().toISOString().slice(0,10);
+    el.innerHTML = list.map(function(j){
+      var expired = j.expires_at && j.expires_at < today;
+      var resp = respByJob[j.id] || [];
+      var own  = j.author_id===uid;
+      var iResp = resp.some(function(x){ return x.user_id===uid; });
+      var term = j.expires_at
+        ? '<span class="jterm'+(expired?" exp":"")+'">'+(expired?"истёк ":"до ")+fmtDate(j.expires_at)+'</span>' : '';
+      var act;
+      if (own) act='<span class="pill">ваша · '+resp.length+' откл.</span>';
+      else if (iResp) act='<span class="pill" style="color:var(--gold-2);border-color:var(--gold-deep)">отклик отправлен</span>';
+      else if (expired) act='<span class="pill">неактивна</span>';
+      else act='<button class="btn btn--ghost" data-respond="'+j.id+'" style="padding:.4rem .8rem;font-size:.8rem">Откликнуться</button>';
+      var respBlock = "";
+      if (own){
+        respBlock = '<div class="jresp">' + (resp.length
+          ? '<b>Отклики ('+resp.length+')</b>' + resp.map(function(x){
+              var who = x.responder_email
+                ? '<a href="mailto:'+esc(x.responder_email)+'">'+esc(x.responder_email)+'</a>' : 'участник';
+              var m = x.message ? ' — '+esc(x.message) : '';
+              return '<div class="jresp__row">'+who+m+'<span class="jresp__d">'+fmtDate(String(x.created_at||"").slice(0,10))+'</span></div>';
+            }).join("")
+          : '<span class="muted" style="font-size:.85rem">Откликов пока нет.</span>') + '</div>';
+      }
+      return '<div class="card jobcard'+(expired?" is-exp":"")+'">'
+        + '<div class="jobcard__top">'
+        +   '<div class="jobcard__main">'
+        +     '<span class="pill">'+esc(j.kind||"")+'</span>'
+        +     (j.pay ? '<span class="jpay">'+esc(j.pay)+'</span>' : '')
+        +     '<h3>'+esc(j.title)+'</h3>'
+        +     (j.description ? '<p class="muted" style="margin:0;font-size:.86rem">'+esc(j.description)+'</p>' : '')
+        +   '</div>'
+        +   '<div class="jobcard__side">'+term+act+'</div>'
+        + '</div>' + respBlock + '</div>';
+    }).join("");
+  }
+
+  // Фильтр «вакансии/подработки»
+  var jfil = $("jobFilter");
+  if (jfil) jfil.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest("[data-jf]") : null;
+    if (!b) return;
+    jobFilter = b.getAttribute("data-jf");
+    jfil.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
+    renderJobs();
+  });
 
   // Записаться на событие (делегирование)
   document.addEventListener("click", function(e){
@@ -260,8 +309,10 @@
   document.addEventListener("click", function(e){
     var btn = e.target.closest ? e.target.closest("[data-respond]") : null;
     if (!btn || !sb || !uid) return;
+    var message = window.prompt("Короткое сообщение автору (необязательно). Ваш e-mail автор увидит в любом случае:", "");
+    if (message === null) return;   // отменил отклик
     btn.disabled = true; btn.textContent = "…";
-    sb.from("job_responses").insert({ job_id: btn.getAttribute("data-respond"), user_id: uid }).then(function(r){
+    sb.from("job_responses").insert({ job_id: btn.getAttribute("data-respond"), user_id: uid, responder_email: myEmail, message: message.trim() }).then(function(r){
       if (r.error){ btn.disabled=false; btn.textContent="Откликнуться"; alert("Не удалось: "+r.error.message); }
       else loadJobs();
     });
@@ -291,11 +342,15 @@
     e.preventDefault();
     if (!sb || !uid){ return; }
     var msg=$("jobMsg"); msg.textContent="Сохраняю…";
+    var days = parseInt($("jo-term").value,10) || 30;
+    var d = new Date(); d.setDate(d.getDate()+days);
+    var expISO = d.toISOString().slice(0,10);
     sb.from("jobs").insert({
       title: $("jo-title").value.trim(),
       kind: $("jo-kind").value,
       pay: $("jo-pay").value.trim(),
       description: $("jo-desc").value.trim(),
+      expires_at: expISO,
       author_id: uid
     }).then(function(r){
       if (r.error){ msg.textContent="Ошибка: "+r.error.message; }
@@ -310,7 +365,7 @@
     $("materialsGrid").innerHTML = card("База знаний","Гайды и шаблоны (демо).") + card("Контакты круга","Кто чем занимается (демо).");
     $("eventsBody").innerHTML = '<tr><td>Встреча круга</td><td>—</td><td><span class="pill">анонс</span></td><td><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Записаться</button></td></tr>';
     $("dealsBody").innerHTML = '<tr><td>Поставка партии оборудования (демо)</td><td>Дело</td><td><span class="pill">ищут партнёра</span></td><td></td></tr>';
-    $("jobsBody").innerHTML = '<tr><td>Водитель на доставку (демо)</td><td><span class="pill">Подработка</span></td><td>сдельно</td><td><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Откликнуться</button></td></tr>';
+    $("jobsList").innerHTML = '<div class="card jobcard"><div class="jobcard__top"><div class="jobcard__main"><span class="pill">Подработка</span><span class="jpay">сдельно</span><h3>Водитель на доставку (демо)</h3><p class="muted" style="margin:0;font-size:.86rem">Развозка по Улан-Удэ, свободный график</p></div><div class="jobcard__side"><span class="jterm">до 30.09.2026</span><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Откликнуться</button></div></div></div>';
   }
 
   // Переключение разделов

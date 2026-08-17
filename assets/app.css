@@ -93,6 +93,26 @@ h1,h2,h3,h4{margin:0 0 .5em;line-height:1.15;letter-spacing:-.01em}
 .pill{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:.2rem .5rem;border-radius:20px;border:1px solid var(--line-2);color:var(--muted)}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
+/* --- Биржа труда --- */
+.jobfilter{display:flex;gap:6px;margin:4px 0 16px;flex-wrap:wrap}
+.jobfilter button{font:inherit;font-weight:600;font-size:.82rem;padding:.4rem .95rem;border-radius:20px;border:1px solid var(--line-2);background:transparent;color:var(--muted);cursor:pointer}
+.jobfilter button:hover{color:var(--text)}
+.jobfilter button.on{background:rgba(199,162,78,.12);color:var(--gold-2);border-color:var(--gold-deep)}
+.jobcard{padding:18px 20px;margin-bottom:12px}
+.jobcard.is-exp{opacity:.62}
+.jobcard__top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.jobcard__main{min-width:0;flex:1 1 auto}
+.jobcard__main h3{font-size:1.04rem;margin:.45rem 0 .25rem}
+.jpay{font-family:var(--mono);color:var(--gold-2);font-size:.82rem;margin-left:8px}
+.jobcard__side{display:flex;flex-direction:column;align-items:flex-end;gap:9px;text-align:right;flex:0 0 auto}
+.jterm{font-family:var(--mono);font-size:.72rem;color:var(--muted-2);white-space:nowrap}
+.jterm.exp{color:var(--err)}
+.jresp{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.jresp b{font-size:.82rem;color:var(--text);display:block;margin-bottom:6px}
+.jresp__row{font-size:.86rem;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--line)}
+.jresp__row:last-child{border-bottom:0}
+.jresp__d{color:var(--muted-2);font-family:var(--mono);font-size:.72rem;margin-left:6px}
+
 @media (max-width:760px){
   .app-layout{grid-template-columns:1fr}
   .side{border-right:0;border-bottom:1px solid var(--line);padding:12px}
