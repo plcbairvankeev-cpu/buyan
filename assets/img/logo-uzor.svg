@@ -1,0 +1,17 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Знак Буян — бурятский узор">
+  <defs>
+    <linearGradient id="uzorAu" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f1da8c"/>
+      <stop offset="50%" stop-color="#d3ad51"/>
+      <stop offset="100%" stop-color="#b5892f"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#uzorAu)" stroke-width="4.2" stroke-linecap="square" stroke-linejoin="miter">
+    <g id="uzorBlade" transform="translate(50,6)">
+      <path d="M2 2 H42 V42 H10 V10 H34 V34 H18 V18 H26"/>
+    </g>
+    <use href="#uzorBlade" transform="rotate(90 50 50)"/>
+    <use href="#uzorBlade" transform="rotate(180 50 50)"/>
+    <use href="#uzorBlade" transform="rotate(270 50 50)"/>
+  </g>
+</svg>
