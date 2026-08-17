@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вход участников · Буян</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="18.2" stroke="#c7a24e" stroke-width="1.5"/><circle cx="20" cy="20" r="5.6" fill="#c7a24e"/><g stroke="#c7a24e" stroke-width="1.4"><path d="M20 4.5V12M20 28v7.5M4.5 20H12M28 20h7.5"/></g></svg>
+      <b>БУЯН</b>
+    </div>
+    <p class="auth-sub">Закрытая зона участников круга</p>
+
+    <div id="demoNotice" class="notice notice--demo" style="display:none">
+      Демо-режим: Supabase ещё не подключён. Можно посмотреть кабинет без реального входа —
+      или заполните <span class="mono">assets/supabase-config.js</span>.
+      <div style="margin-top:12px"><button class="btn btn--gold btn--block" id="demoBtn">Войти в демо-режиме</button></div>
+    </div>
+
+    <div id="authBox">
+      <div class="tabs" role="tablist">
+        <button id="tabIn" class="on" type="button">Вход</button>
+        <button id="tabUp" type="button">Регистрация</button>
+      </div>
+
+      <div class="notice notice--err" id="err"></div>
+      <div class="notice notice--ok" id="ok"></div>
+
+      <form id="form" autocomplete="on">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="pass">Пароль</label>
+          <input id="pass" name="password" type="password" required minlength="6" autocomplete="current-password">
+        </div>
+        <button class="btn btn--gold btn--block" id="submitBtn" type="submit">Войти</button>
+      </form>
+    </div>
+
+    <div class="auth-foot"><a href="index.html">← Вернуться на сайт</a></div>
+  </div>
+</div>
+
+<!-- supabase-js (нужен интернет). Если недоступен — работает демо-режим. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+(function () {
+  var A = window.BuyanAuth;
+  var mode = "in"; // in | up
+  var $ = function (id) { return document.getElementById(id); };
+  var err = $("err"), ok = $("ok");
+  function showErr(m){ err.textContent = m; err.classList.add("on"); ok.classList.remove("on"); }
+  function showOk(m){ ok.textContent = m; ok.classList.add("on"); err.classList.remove("on"); }
+  function clearMsg(){ err.classList.remove("on"); ok.classList.remove("on"); }
+
+  // Демо-режим, если Supabase не настроен
+  if (!A.isConfigured()) {
+    $("demoNotice").style.display = "block";
+    $("demoBtn").addEventListener("click", function () { A.demoLogin(); location.href = "kabinet.html"; });
+  }
+
+  function setMode(m) {
+    mode = m; clearMsg();
+    $("tabIn").classList.toggle("on", m === "in");
+    $("tabUp").classList.toggle("on", m === "up");
+    $("submitBtn").textContent = m === "in" ? "Войти" : "Зарегистрироваться";
+    $("pass").setAttribute("autocomplete", m === "in" ? "current-password" : "new-password");
+  }
+  $("tabIn").addEventListener("click", function () { setMode("in"); });
+  $("tabUp").addEventListener("click", function () { setMode("up"); });
+
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearMsg();
+    if (!A.isConfigured()) { showErr("Supabase не настроен. Войдите в демо-режиме или заполните конфиг."); return; }
+    var email = $("email").value.trim(), pass = $("pass").value;
+    var btn = $("submitBtn"); btn.disabled = true;
+    var action = mode === "in" ? A.signIn(email, pass) : A.signUp(email, pass);
+    action.then(function (res) {
+      btn.disabled = false;
+      if (res && res.error) { showErr(translate(res.error.message)); return; }
+      if (mode === "up") {
+        // При включённом подтверждении почты сессии сразу не будет
+        var hasSession = res && res.data && res.data.session;
+        if (!hasSession) { showOk("Заявка принята. Проверьте почту и подтвердите регистрацию, затем войдите."); setMode("in"); return; }
+      }
+      location.href = "kabinet.html";
+    }).catch(function (ex) { btn.disabled = false; showErr(ex.message || "Ошибка"); });
+  });
+
+  // Уже вошли — сразу в кабинет
+  A.currentUser().then(function (u) { if (u) location.replace("kabinet.html"); });
+
+  function translate(m) {
+    if (/Invalid login/i.test(m)) return "Неверный e-mail или пароль.";
+    if (/already registered/i.test(m)) return "Такой участник уже зарегистрирован — войдите.";
+    if (/Password should/i.test(m)) return "Пароль слишком короткий (минимум 6 символов).";
+    if (/Email not confirmed/i.test(m)) return "Почта не подтверждена — проверьте письмо.";
+    return m;
+  }
+})();
+</script>
+</body>
+</html>

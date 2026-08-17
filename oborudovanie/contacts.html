@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Контакты и запрос спецификации | «название»</title>
+  <meta name="description" content="Контакты компании «название»: телефон, e-mail, режим работы. Запросите спецификацию, коммерческое предложение или расчёт — вернёмся с ценой и сроком в течение рабочего дня.">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">К основному содержимому</a>
+  <header class="site-header">
+    <div class="wrap site-header__row">
+      <a class="logo" href="index.html" aria-label="На главную"><svg class="logo__mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="3" stroke="#1f5c8b" stroke-width="1.6"/><path d="M8 22V10l8 5 8-5v12" stroke="#1f5c8b" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="20.5" r="2.2" fill="#b26f12"/></svg><span><span data-cfg="company.name">«название»</span><small>Поставка · Сервис · Инжиниринг</small></span></a>
+      <button class="nav-toggle" aria-label="Меню" aria-expanded="false" aria-controls="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <nav class="nav" id="nav" aria-label="Основная навигация">
+        <a href="production.html">Направления</a><a href="batteries.html">Сервис</a><a href="tenders.html">Заказчикам</a><a href="about.html">О компании</a><a href="contacts.html" aria-current="page">Контакты</a><a class="nav__lang" href="cn.html" lang="zh" hreflang="zh">中文</a><a class="nav__cta" href="#request">Запросить спецификацию</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="pageintro">
+      <div class="wrap pageintro__inner">
+        <div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span>Контакты</div>
+        <h1>Контакты</h1>
+        <p class="lead">Пришлите ТЗ или список позиций — вернёмся с ценой и сроком за 24 часа. Отвечаем на запросы
+          спецификаций, КП и расчётов по всем направлениям.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="grid-2" style="align-items:start; gap:48px">
+          <div>
+            <p class="eyebrow">Связаться</p>
+            <h2>Отдел продаж</h2>
+            <div class="card" style="margin-top:1rem">
+              <table class="reqs" style="border:0">
+                <tbody>
+                  <tr><th scope="row">Телефон</th><td><a data-cfg="contacts.phoneHref" data-cfg-attr="href" href="tel:+70000000000"><span data-cfg="contacts.phone">—</span></a></td></tr>
+                  <tr><th scope="row">E-mail</th><td><a data-cfg="contacts.emailHref" data-cfg-attr="href" href="mailto:sales@example.ru"><span data-cfg="contacts.email">—</span></a></td></tr>
+                  <tr><th scope="row">Telegram</th><td data-cfg="contacts.telegram">—</td></tr>
+                  <tr><th scope="row">Офис / склад</th><td data-cfg="contacts.office">—</td></tr>
+                  <tr><th scope="row">Режим работы</th><td data-cfg="contacts.hours">Пн–Пт, 09:00–18:00 (МСК)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="muted" style="margin-top:1.2rem; font-size:.9rem">Юридические реквизиты предприятия — в разделе
+              <a href="tenders.html">«Заказчикам»</a>.</p>
+          </div>
+
+          <div id="request">
+            <p class="eyebrow">Запрос</p>
+            <h2>Запросить спецификацию или расчёт</h2>
+            <form class="form" data-lead-form novalidate style="margin-top:1rem">
+              <div class="field--row">
+                <div class="field"><label for="c-name">Имя <span class="req">*</span></label><input id="c-name" name="name" required></div>
+                <div class="field"><label for="c-company">Организация</label><input id="c-company" name="company"></div>
+              </div>
+              <div class="field--row">
+                <div class="field"><label for="c-phone">Телефон <span class="req">*</span></label><input id="c-phone" name="phone" type="tel" required></div>
+                <div class="field"><label for="c-email">E-mail</label><input id="c-email" name="email" type="email"></div>
+              </div>
+              <div class="field"><label for="c-dir">Направление</label>
+                <select id="c-dir" name="direction">
+                  <option>Производственное оборудование</option>
+                  <option>Тяговые батареи</option>
+                  <option>Решения для дома</option>
+                  <option>Солнечные станции</option>
+                  <option>Электромобили</option>
+                  <option>Другое</option>
+                </select>
+              </div>
+              <div class="field"><label for="c-msg">Сообщение <span class="req">*</span></label><textarea id="c-msg" name="message" required placeholder="Список позиций, ТЗ или суть задачи"></textarea></div>
+              <label class="form__consent"><input type="checkbox" name="consent" required> <span>Согласен на обработку персональных данных согласно <a href="consent.html">152-ФЗ</a>.</span></label>
+              <div class="form-status" role="status" aria-live="polite"></div>
+              <button class="btn btn--primary" type="submit">Отправить запрос</button>
+              <p class="form__note">Форма без бэкенда — отправка подключается в <code>assets/js/main.js</code> (см. комментарий).</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div><div class="footer-logo"><svg class="logo__mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="3" stroke="#3f6f95" stroke-width="1.6"/><path d="M8 22V10l8 5 8-5v12" stroke="#3f6f95" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="20.5" r="2.2" fill="#b26f12"/></svg><span data-cfg="company.name">«название»</span></div><p class="footer-about">Поставка, сервис и инжиниринг промышленного и энергетического оборудования из Китая в Россию.</p></div>
+        <div><h4>Направления</h4><ul class="footer-links"><li><a href="production.html">Производственное оборудование</a></li><li><a href="batteries.html">Тяговые батареи</a></li><li><a href="home-energy.html">Решения для дома</a></li><li><a href="solar.html">Солнечные станции</a></li><li><a href="ev.html">Электромобили</a></li></ul></div>
+        <div><h4>Компания</h4><ul class="footer-links"><li><a href="tenders.html">Заказчикам</a></li><li><a href="about.html">О компании</a></li><li><a href="contacts.html">Контакты</a></li><li><a href="cn.html" lang="zh">中文 / Китайская версия</a></li></ul></div>
+        <div><h4>Контакты</h4><div class="footer-reqs"><div>Тел.: <a data-cfg="contacts.phoneHref" data-cfg-attr="href" href="tel:+70000000000"><span data-cfg="contacts.phone">—</span></a></div><div>Почта: <a data-cfg="contacts.emailHref" data-cfg-attr="href" href="mailto:sales@example.ru"><span data-cfg="contacts.email">—</span></a></div><div><span data-cfg="contacts.hours">Пн–Пт, 09:00–18:00 (МСК)</span></div></div></div>
+      </div>
+      <div class="footer-bottom"><div>© <span data-year>2026</span> <span data-cfg="company.legalName">ООО «название»</span>. Все права защищены.</div><div><a href="privacy.html">Политика конфиденциальности</a> · <a href="consent.html">Согласие на обработку данных (152-ФЗ)</a></div></div>
+    </div>
+  </footer>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
