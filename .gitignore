@@ -1,4 +1,6 @@
 *.zip
+*.sql
+supabase/
 .DS_Store
 .env
 node_modules/

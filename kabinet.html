@@ -31,7 +31,7 @@
 
   <main class="main">
     <div id="demoBanner" class="notice notice--demo" style="display:none">
-      Демо-режим: данные ниже — заглушки. После подключения Supabase здесь будут ваши реальные данные из таблиц с защитой RLS.
+      Демо-режим: данные ниже — заглушки. Реальные данные появляются после входа через Supabase.
     </div>
 
     <div class="kab">
@@ -43,12 +43,12 @@
           <div class="ava" id="ava">Б</div>
           <div>
             <div class="who" id="profEmail">…</div>
-            <div class="role">Участник круга</div>
+            <div class="role" id="profRole">Участник круга</div>
           </div>
         </div>
         <div class="grid">
-          <div class="card"><h3>Мой статус</h3><p>Участник · доступ к закрытым разделам. Уровень и роль настраиваются в вашей БД.</p></div>
-          <div class="card"><h3>Мои направления</h3><p>Проекты и сферы, к которым вы подключены. Данные — из таблицы участника.</p></div>
+          <div class="card"><h3>Мой статус</h3><p id="profStatus">Участник · доступ к закрытым разделам.</p></div>
+          <div class="card"><h3>Моё направление</h3><p id="profDir">—</p></div>
         </div>
       </section>
 
@@ -57,15 +57,8 @@
         <p class="eyebrow">Только для участников</p>
         <h1>Закрытые материалы</h1>
         <p class="muted">Документы, записи, база знаний и контакты круга.</p>
-        <div class="grid">
-          <div class="card"><h3>База знаний</h3><p>Гайды, шаблоны, регламенты направлений.</p></div>
-          <div class="card"><h3>Записи встреч</h3><p>Видео и конспекты внутренних сессий.</p></div>
-          <div class="card"><h3>Контакты круга</h3><p>Кто чем занимается, к кому идти с задачей.</p></div>
-          <div class="card"><h3>Документы</h3><p>Отчёты, презентации, юридические шаблоны.</p></div>
-        </div>
-        <div class="locked">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <p>Контент подставляется из таблицы <span class="mono">materials</span> в Supabase. Доступ к строкам ограничивается политиками RLS — читают только участники.</p>
+        <div class="grid" id="materialsGrid">
+          <div class="card"><p class="muted">Загрузка…</p></div>
         </div>
       </section>
 
@@ -73,17 +66,13 @@
       <section class="kab-sec" id="sec-events">
         <p class="eyebrow">Жизнь круга</p>
         <h1>События и заявки</h1>
-        <table class="tablelike">
-          <thead><tr><th>Событие</th><th>Дата</th><th>Статус</th></tr></thead>
-          <tbody>
-            <tr><td>Встреча круга</td><td>обновляется</td><td><span class="pill">запись открыта</span></td></tr>
-            <tr><td>Разбор проекта</td><td>обновляется</td><td><span class="pill">анонс</span></td></tr>
-            <tr><td>Сбор направления «Дело»</td><td>обновляется</td><td><span class="pill">планируется</span></td></tr>
-          </tbody>
-        </table>
-        <div class="locked" style="margin-top:20px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
-          <p>События — из таблицы <span class="mono">events</span>; заявки участника пишутся в <span class="mono">event_signups</span>. Кнопку «Записаться» подключите к вставке строки.</p>
+        <div class="table-scroll">
+          <table class="tablelike">
+            <thead><tr><th>Событие</th><th>Дата</th><th>Статус</th><th>Действие</th></tr></thead>
+            <tbody id="eventsBody">
+              <tr><td colspan="4" class="muted">Загрузка…</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -92,17 +81,30 @@
         <p class="eyebrow">Внутренняя доска</p>
         <h1>Сделки и проекты</h1>
         <p class="muted">Кто что предлагает, совместные проекты, обмен ресурсом внутри круга.</p>
-        <table class="tablelike">
-          <thead><tr><th>Проект / сделка</th><th>Направление</th><th>Статус</th></tr></thead>
-          <tbody>
-            <tr><td>Пример: поставка партии оборудования</td><td>Дело</td><td><span class="pill">ищут партнёра</span></td></tr>
-            <tr><td>Пример: продакшн ролика</td><td>Медиа</td><td><span class="pill">в работе</span></td></tr>
-            <tr><td>Пример: совместный сбор</td><td>Добро</td><td><span class="pill">открыт</span></td></tr>
-          </tbody>
-        </table>
-        <div class="locked" style="margin-top:20px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18M6 7V5h12v2M4 7l1 13h14l1-13"/></svg>
-          <p>Доска — из таблицы <span class="mono">deals</span>. Добавление предложений — вставка строки с <span class="mono">author_id = auth.uid()</span>, видимость — по RLS.</p>
+
+        <form id="dealForm" class="card" style="margin:18px 0;display:grid;gap:12px">
+          <strong>Добавить своё предложение</strong>
+          <div class="field" style="margin:0"><label for="d-title">Проект / сделка</label><input id="d-title" required></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field" style="margin:0"><label for="d-dir">Направление</label>
+              <select id="d-dir"><option>Дело</option><option>Медиа</option><option>Добро</option></select>
+            </div>
+            <div class="field" style="margin:0"><label for="d-status">Статус</label>
+              <select id="d-status"><option>открыт</option><option>ищут партнёра</option><option>в работе</option></select>
+            </div>
+          </div>
+          <div class="field" style="margin:0"><label for="d-desc">Описание</label><input id="d-desc" placeholder="Коротко, что предлагаете"></div>
+          <div><button class="btn btn--gold" type="submit" style="padding:.55rem 1.1rem;font-size:.88rem">Добавить</button>
+            <span id="dealMsg" class="muted" style="margin-left:12px;font-size:.85rem"></span></div>
+        </form>
+
+        <div class="table-scroll">
+          <table class="tablelike">
+            <thead><tr><th>Проект / сделка</th><th>Направление</th><th>Статус</th><th></th></tr></thead>
+            <tbody id="dealsBody">
+              <tr><td colspan="4" class="muted">Загрузка…</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -115,17 +117,123 @@
 <script>
 (function () {
   var A = window.BuyanAuth;
+  var sb = A.getClient ? A.getClient() : null;   // supabase-клиент (null в демо/без настройки)
   var $ = function (id) { return document.getElementById(id); };
+  var uid = null;
 
-  // Защита: нет сессии → на вход
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function fmtDate(d){ if(!d) return "—"; var p=String(d).split("-"); return p.length===3 ? p[2]+"."+p[1]+"."+p[0] : d; }
+
+  // Защита + шапка/профиль
   A.requireAuth("vhod.html").then(function (u) {
     if (!u) return;
     $("userName").textContent = u.email;
     $("profEmail").textContent = u.email;
     var letter = (u.email || "Б").trim().charAt(0).toUpperCase();
     $("ava").textContent = /[A-Za-zА-Яа-я]/.test(letter) ? letter : "Б";
-    if (u.demo) $("demoBanner").style.display = "block";
+
+    if (u.demo || !sb) {                 // демо-режим — оставляем заглушки
+      $("demoBanner").style.display = "block";
+      demoFill();
+      return;
+    }
+    // Реальный режим — тянем данные из Supabase
+    sb.auth.getUser().then(function (r) {
+      uid = r && r.data && r.data.user ? r.data.user.id : null;
+      loadProfile(); loadMaterials(); loadEvents(); loadDeals();
+    });
   });
+
+  function loadProfile(){
+    sb.from("profiles").select("role,direction").maybeSingle().then(function(r){
+      var p = r.data;
+      if (p){
+        if (p.role) $("profRole").textContent = p.role + " круга";
+        $("profStatus").textContent = (p.role||"Участник") + " · доступ к закрытым разделам.";
+        $("profDir").textContent = p.direction || "—";
+      }
+    });
+  }
+
+  function loadMaterials(){
+    sb.from("materials").select("title,description,category,url").order("created_at",{ascending:false})
+      .then(function(r){
+        var g = $("materialsGrid");
+        if (r.error){ g.innerHTML = card("Не удалось загрузить", r.error.message); return; }
+        if (!r.data.length){ g.innerHTML = card("Пока пусто", "Материалы появятся здесь."); return; }
+        g.innerHTML = r.data.map(function(m){
+          var link = m.url ? '<p style="margin:10px 0 0"><a href="'+esc(m.url)+'" target="_blank" rel="noopener">Открыть ↗</a></p>' : "";
+          return '<div class="card"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description||"")+'</p>'+link+'</div>';
+        }).join("");
+      });
+  }
+
+  function loadEvents(){
+    Promise.all([
+      sb.from("events").select("id,title,event_date,status").order("created_at",{ascending:false}),
+      sb.from("event_signups").select("event_id")
+    ]).then(function(res){
+      var ev=res[0], sg=res[1], body=$("eventsBody");
+      if (ev.error){ body.innerHTML = '<tr><td colspan="4" class="muted">'+esc(ev.error.message)+'</td></tr>'; return; }
+      if (!ev.data.length){ body.innerHTML = '<tr><td colspan="4" class="muted">Событий пока нет.</td></tr>'; return; }
+      var mine = {}; (sg.data||[]).forEach(function(s){ mine[s.event_id]=true; });
+      body.innerHTML = ev.data.map(function(e){
+        var act = mine[e.id]
+          ? '<span class="pill" style="color:var(--gold-2);border-color:var(--gold-deep)">вы записаны</span>'
+          : '<button class="btn btn--ghost" data-signup="'+e.id+'" style="padding:.4rem .8rem;font-size:.8rem">Записаться</button>';
+        return '<tr><td>'+esc(e.title)+'</td><td>'+fmtDate(e.event_date)+'</td><td><span class="pill">'+esc(e.status||"")+'</span></td><td>'+act+'</td></tr>';
+      }).join("");
+    });
+  }
+
+  function loadDeals(){
+    sb.from("deals").select("title,direction,status").order("created_at",{ascending:false}).then(function(r){
+      var body=$("dealsBody");
+      if (r.error){ body.innerHTML = '<tr><td colspan="4" class="muted">'+esc(r.error.message)+'</td></tr>'; return; }
+      if (!r.data.length){ body.innerHTML = '<tr><td colspan="4" class="muted">Предложений пока нет — добавьте первое.</td></tr>'; return; }
+      body.innerHTML = r.data.map(function(d){
+        return '<tr><td>'+esc(d.title)+'</td><td>'+esc(d.direction||"—")+'</td><td><span class="pill">'+esc(d.status||"")+'</span></td><td></td></tr>';
+      }).join("");
+    });
+  }
+
+  // Записаться на событие (делегирование)
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest ? e.target.closest("[data-signup]") : null;
+    if (!btn || !sb || !uid) return;
+    btn.disabled = true; btn.textContent = "…";
+    sb.from("event_signups").insert({ event_id: btn.getAttribute("data-signup"), user_id: uid }).then(function(r){
+      if (r.error){ btn.disabled=false; btn.textContent="Записаться"; alert("Не удалось записаться: "+r.error.message); }
+      else loadEvents();
+    });
+  });
+
+  // Добавить сделку
+  var df = $("dealForm");
+  if (df) df.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!sb || !uid){ return; }
+    var msg=$("dealMsg"); msg.textContent="Сохраняю…";
+    sb.from("deals").insert({
+      title: $("d-title").value.trim(),
+      description: $("d-desc").value.trim(),
+      direction: $("d-dir").value,
+      status: $("d-status").value,
+      author_id: uid
+    }).then(function(r){
+      if (r.error){ msg.textContent="Ошибка: "+r.error.message; }
+      else { msg.textContent="Добавлено."; df.reset(); loadDeals(); setTimeout(function(){msg.textContent="";},2500); }
+    });
+  });
+
+  function card(t,p){ return '<div class="card"><h3>'+esc(t)+'</h3><p class="muted">'+esc(p)+'</p></div>'; }
+
+  // Заглушки для демо-режима
+  function demoFill(){
+    $("materialsGrid").innerHTML = card("База знаний","Гайды и шаблоны (демо).") + card("Контакты круга","Кто чем занимается (демо).");
+    $("eventsBody").innerHTML = '<tr><td>Встреча круга</td><td>—</td><td><span class="pill">анонс</span></td><td><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Записаться</button></td></tr>';
+    $("dealsBody").innerHTML = '<tr><td>Поставка партии оборудования (демо)</td><td>Дело</td><td><span class="pill">ищут партнёра</span></td><td></td></tr>';
+  }
 
   // Переключение разделов
   var links = document.querySelectorAll("#nav a");
@@ -133,9 +241,7 @@
     a.addEventListener("click", function () {
       var sec = a.getAttribute("data-sec");
       links.forEach(function (x) { x.classList.toggle("on", x === a); });
-      document.querySelectorAll(".kab-sec").forEach(function (s) {
-        s.classList.toggle("on", s.id === "sec-" + sec);
-      });
+      document.querySelectorAll(".kab-sec").forEach(function (s) { s.classList.toggle("on", s.id === "sec-" + sec); });
       window.scrollTo(0, 0);
     });
   });

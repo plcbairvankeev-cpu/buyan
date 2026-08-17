@@ -68,6 +68,7 @@
 
   window.BuyanAuth = {
     isConfigured: isConfigured,
+    getClient: client,
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
