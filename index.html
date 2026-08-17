@@ -175,6 +175,20 @@ img,svg{display:block;max-width:100%}
 .pmini .n{font-weight:600;font-size:.92rem;line-height:1.25}
 .pmini .r{font-size:.78rem;color:var(--muted)}
 
+/* Хроника (таймлайн) */
+.timeline{list-style:none;margin:38px 0 0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:9px;top:6px;bottom:8px;width:2px;background:var(--line-2)}
+.tl{position:relative;padding:0 0 26px 42px}
+.tl:last-child{padding-bottom:0}
+.tl__dot{position:absolute;left:2px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid var(--dot,var(--gold));box-shadow:0 0 0 4px var(--ink)}
+.tl--delo{--dot:var(--c-delo)}
+.tl--media{--dot:var(--c-media)}
+.tl--dobro{--dot:var(--c-dobro)}
+.tl__meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:.35rem}
+.tl__date{font-family:var(--mono);font-size:.76rem;color:var(--muted-2);letter-spacing:.02em}
+.tl h4{margin:0 0 .3rem;font-size:1.06rem}
+.tl p{margin:0;font-size:.9rem;color:var(--muted);max-width:70ch}
+
 /* ---------- Структура (созвездие) ---------- */
 .structure{background:var(--panel);border-block:1px solid var(--line)}
 .constellation{width:100%;max-width:760px;margin:36px auto 0;height:auto}
@@ -382,6 +396,7 @@ img,svg{display:block;max-width:100%}
       <a href="#people">Круг</a>
       <a href="#media">Медиа</a>
       <a href="#social">Сообщество</a>
+      <a href="#chronicle">Хроника</a>
       <a href="#sponsors">Спонсорам</a>
       <a href="vhod.html">Вход</a>
       <a href="#join" class="nav__cta">Войти в круг</a>
@@ -703,6 +718,57 @@ img,svg{display:block;max-width:100%}
   </div>
 </section>
 
+<!-- ХРОНИКА -->
+<!-- Замените записи на реальные: дата, сфера (класс tl--delo / tl--media / tl--dobro),
+     заголовок, описание. Порядок — сверху новое. Живую ленту ведите в соцсетях. -->
+<section class="section" id="chronicle">
+  <div class="wrap">
+    <div class="reveal" style="max-width:64ch">
+      <p class="eyebrow">Хроника</p>
+      <h2 class="balance">Что делает круг</h2>
+      <p class="lead">Живая лента дел, помощи и запусков — доказательство, что Буян работает, а не просто
+        красиво выглядит. Ниже — заглушки; замените реальными событиями, а свежее ведите в соцсетях.</p>
+    </div>
+
+    <ol class="timeline reveal">
+      <li class="tl tl--dobro">
+        <span class="tl__dot"></span>
+        <div class="tl__meta"><span class="tl__date">Авг 2026</span><span class="tag tag--dobro">Добро</span></div>
+        <h4>Адресная помощь семье участника СВО</h4>
+        <p>Собрали и передали — с отчётом по каждой позиции. Подробности и чеки — в нашем Telegram.</p>
+      </li>
+      <li class="tl tl--delo">
+        <span class="tl__dot"></span>
+        <div class="tl__meta"><span class="tl__date">Авг 2026</span><span class="tag tag--delo">Дело</span></div>
+        <h4>Отгрузка оборудования заказчику</h4>
+        <p>Партия прошла через Маньчжурию и приехала на площадку — от спецификации до пусконаладки.</p>
+      </li>
+      <li class="tl tl--media">
+        <span class="tl__dot"></span>
+        <div class="tl__meta"><span class="tl__date">Июл 2026</span><span class="tag tag--media">Медиа</span></div>
+        <h4>Вышел ролик о направлении</h4>
+        <p>Студия сняла и выпустила видео — охват пошёл сразу на несколько площадок круга.</p>
+      </li>
+      <li class="tl tl--delo">
+        <span class="tl__dot"></span>
+        <div class="tl__meta"><span class="tl__date">Июл 2026</span><span class="tag tag--delo">Дело</span></div>
+        <h4>Новый маршрут: Монголия напрямую в РФ</h4>
+        <p>Добавили второй канал ввоза в дополнение к маршруту через Маньчжурию.</p>
+      </li>
+      <li class="tl tl--dobro">
+        <span class="tl__dot"></span>
+        <div class="tl__meta"><span class="tl__date">Июн 2026</span><span class="tag tag--dobro">Добро</span></div>
+        <h4>Запустили программу помощи нуждающимся</h4>
+        <p>Детские дома, больные дети и семьи в сложной ситуации — адресно, с открытыми отчётами.</p>
+      </li>
+    </ol>
+
+    <div class="btn-row reveal" style="margin-top:28px">
+      <a class="btn btn--ghost" data-cfg="social.telegram" data-cfg-attr="href" href="#" target="_blank" rel="noopener">Вся хроника — в Telegram ↗</a>
+    </div>
+  </div>
+</section>
+
 <!-- СПОНСОРСТВО -->
 <section class="section" id="sponsors">
   <div class="wrap">
@@ -791,6 +857,7 @@ img,svg{display:block;max-width:100%}
         <li><a href="#people">Кто в круге</a></li>
         <li><a href="#media">Медиапродакшн</a></li>
         <li><a href="#social">Социальные</a></li>
+        <li><a href="#chronicle">Хроника</a></li>
         <li><a href="#sponsors">Спонсорам</a></li>
       </ul></div>
       <div><h5>Проекты</h5><ul>
