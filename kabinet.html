@@ -26,6 +26,7 @@
       <a data-sec="materials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h11l5 5v9H4z"/><path d="M15 5v5h5"/></svg>Материалы</a>
       <a data-sec="events"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>События и заявки</a>
       <a data-sec="deals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18M6 7V5h12v2M4 7l1 13h14l1-13"/></svg>Сделки и проекты</a>
+      <a data-sec="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>Биржа труда</a>
     </nav>
   </aside>
 
@@ -107,6 +108,33 @@
           </table>
         </div>
       </section>
+
+      <!-- Биржа труда -->
+      <section class="kab-sec" id="sec-jobs">
+        <p class="eyebrow">Работа в круге</p>
+        <h1>Биржа труда</h1>
+        <p class="muted">Вакансии и подработки от участников круга и партнёров. Размещайте своё и откликайтесь.</p>
+
+        <form id="jobForm" class="card" style="margin:18px 0;display:grid;gap:12px">
+          <strong>Разместить вакансию или подработку</strong>
+          <div class="field" style="margin:0"><label for="jo-title">Что за работа</label><input id="jo-title" required></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field" style="margin:0"><label for="jo-kind">Тип</label>
+              <select id="jo-kind"><option>Подработка</option><option>Вакансия</option></select></div>
+            <div class="field" style="margin:0"><label for="jo-pay">Оплата</label><input id="jo-pay" placeholder="напр. 2000 ₽/смена"></div>
+          </div>
+          <div class="field" style="margin:0"><label for="jo-desc">Описание</label><input id="jo-desc" placeholder="Что делать, условия, график"></div>
+          <div><button class="btn btn--gold" type="submit" style="padding:.55rem 1.1rem;font-size:.88rem">Разместить</button>
+            <span id="jobMsg" class="muted" style="margin-left:12px;font-size:.85rem"></span></div>
+        </form>
+
+        <div class="table-scroll">
+          <table class="tablelike">
+            <thead><tr><th>Работа</th><th>Тип</th><th>Оплата</th><th></th></tr></thead>
+            <tbody id="jobsBody"><tr><td colspan="4" class="muted">Загрузка…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -140,7 +168,7 @@
     // Реальный режим — тянем данные из Supabase
     sb.auth.getUser().then(function (r) {
       uid = r && r.data && r.data.user ? r.data.user.id : null;
-      loadProfile(); loadMaterials(); loadEvents(); loadDeals();
+      loadProfile(); loadMaterials(); loadEvents(); loadDeals(); loadJobs();
     });
   });
 
@@ -197,6 +225,26 @@
     });
   }
 
+  function loadJobs(){
+    Promise.all([
+      sb.from("jobs").select("id,title,kind,pay,description,author_id").order("created_at",{ascending:false}),
+      sb.from("job_responses").select("job_id")
+    ]).then(function(res){
+      var jb=res[0], rs=res[1], body=$("jobsBody");
+      if (jb.error){ body.innerHTML='<tr><td colspan="4" class="muted">'+esc(jb.error.message)+'</td></tr>'; return; }
+      if (!jb.data.length){ body.innerHTML='<tr><td colspan="4" class="muted">Пока нет вакансий — разместите первую.</td></tr>'; return; }
+      var mine={}; (rs.data||[]).forEach(function(x){ mine[x.job_id]=true; });
+      body.innerHTML = jb.data.map(function(j){
+        var act;
+        if (j.author_id===uid) act='<span class="pill">ваша</span>';
+        else if (mine[j.id]) act='<span class="pill" style="color:var(--gold-2);border-color:var(--gold-deep)">отклик отправлен</span>';
+        else act='<button class="btn btn--ghost" data-respond="'+j.id+'" style="padding:.4rem .8rem;font-size:.8rem">Откликнуться</button>';
+        var desc = j.description ? '<div class="muted" style="font-size:.82rem;margin-top:3px">'+esc(j.description)+'</div>' : '';
+        return '<tr><td>'+esc(j.title)+desc+'</td><td><span class="pill">'+esc(j.kind||"")+'</span></td><td>'+esc(j.pay||"—")+'</td><td>'+act+'</td></tr>';
+      }).join("");
+    });
+  }
+
   // Записаться на событие (делегирование)
   document.addEventListener("click", function(e){
     var btn = e.target.closest ? e.target.closest("[data-signup]") : null;
@@ -205,6 +253,17 @@
     sb.from("event_signups").insert({ event_id: btn.getAttribute("data-signup"), user_id: uid }).then(function(r){
       if (r.error){ btn.disabled=false; btn.textContent="Записаться"; alert("Не удалось записаться: "+r.error.message); }
       else loadEvents();
+    });
+  });
+
+  // Откликнуться на вакансию (делегирование)
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest ? e.target.closest("[data-respond]") : null;
+    if (!btn || !sb || !uid) return;
+    btn.disabled = true; btn.textContent = "…";
+    sb.from("job_responses").insert({ job_id: btn.getAttribute("data-respond"), user_id: uid }).then(function(r){
+      if (r.error){ btn.disabled=false; btn.textContent="Откликнуться"; alert("Не удалось: "+r.error.message); }
+      else loadJobs();
     });
   });
 
@@ -226,6 +285,24 @@
     });
   });
 
+  // Разместить вакансию
+  var jf = $("jobForm");
+  if (jf) jf.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!sb || !uid){ return; }
+    var msg=$("jobMsg"); msg.textContent="Сохраняю…";
+    sb.from("jobs").insert({
+      title: $("jo-title").value.trim(),
+      kind: $("jo-kind").value,
+      pay: $("jo-pay").value.trim(),
+      description: $("jo-desc").value.trim(),
+      author_id: uid
+    }).then(function(r){
+      if (r.error){ msg.textContent="Ошибка: "+r.error.message; }
+      else { msg.textContent="Размещено."; jf.reset(); loadJobs(); setTimeout(function(){msg.textContent="";},2500); }
+    });
+  });
+
   function card(t,p){ return '<div class="card"><h3>'+esc(t)+'</h3><p class="muted">'+esc(p)+'</p></div>'; }
 
   // Заглушки для демо-режима
@@ -233,6 +310,7 @@
     $("materialsGrid").innerHTML = card("База знаний","Гайды и шаблоны (демо).") + card("Контакты круга","Кто чем занимается (демо).");
     $("eventsBody").innerHTML = '<tr><td>Встреча круга</td><td>—</td><td><span class="pill">анонс</span></td><td><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Записаться</button></td></tr>';
     $("dealsBody").innerHTML = '<tr><td>Поставка партии оборудования (демо)</td><td>Дело</td><td><span class="pill">ищут партнёра</span></td><td></td></tr>';
+    $("jobsBody").innerHTML = '<tr><td>Водитель на доставку (демо)</td><td><span class="pill">Подработка</span></td><td>сдельно</td><td><button class="btn btn--ghost" style="padding:.4rem .8rem;font-size:.8rem" disabled>Откликнуться</button></td></tr>';
   }
 
   // Переключение разделов
