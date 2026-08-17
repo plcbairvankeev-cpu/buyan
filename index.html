@@ -198,6 +198,15 @@ img,svg{display:block;max-width:100%}
 .roots-facts b{display:block;font-family:var(--mono);color:var(--gold-2);font-size:1.05rem;letter-spacing:-.01em}
 .roots-facts span{font-size:.72rem;color:var(--muted);display:block;margin-top:.25rem}
 
+/* Герб в шапке + эмблема лицея на первом экране */
+img.brand__mark{object-fit:contain}
+.hero__emblem{position:absolute;z-index:2;top:clamp(100px,11vw,168px);right:calc((100% - min(100% - 40px, 1180px)) / 2);width:176px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.hero__emblem__mark{width:96px;height:96px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.03);border:1px solid #35566e;color:#8fb3cf;font-family:var(--mono);font-size:.85rem;letter-spacing:.05em}
+.hero__emblem__mark img{width:100%;height:100%;object-fit:contain}
+.hero__emblem b{color:#fff;letter-spacing:.06em;font-size:1.12rem}
+.hero__emblem span{color:var(--on-graphite-2);font-size:.72rem;line-height:1.35}
+@media(max-width:1220px){.hero__emblem{display:none}}
+
 /* ---------- Структура (созвездие) ---------- */
 .structure{background:var(--panel);border-block:1px solid var(--line)}
 .constellation{width:100%;max-width:760px;margin:36px auto 0;height:auto}
@@ -386,7 +395,8 @@ img,svg{display:block;max-width:100%}
 <header class="hdr">
   <div class="wrap hdr__row">
     <a class="brand" href="#top" aria-label="Буян — на главную">
-      <svg class="brand__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <img class="brand__mark" src="assets/img/gerb-rbnli.png" alt="Герб РБНЛИ №1" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <svg class="brand__mark" style="display:none" viewBox="0 0 40 40" fill="none" aria-hidden="true">
         <circle cx="20" cy="20" r="18.2" stroke="#c7a24e" stroke-width="1.5"/>
         <circle cx="20" cy="20" r="5.6" fill="#c7a24e"/>
         <g stroke="#c7a24e" stroke-width="1.4">
@@ -440,6 +450,11 @@ img,svg{display:block;max-width:100%}
       <div class="fact"><div class="fact__n" data-cfg="stats.base">Бурятия</div><div class="fact__l">Дом сообщества</div></div>
     </div>
   </div>
+  <aside class="hero__emblem" aria-hidden="true">
+    <div class="hero__emblem__mark"><img src="assets/img/gerb-rbnli.png" alt="Герб РБНЛИ №1" onerror="this.style.display='none';this.parentNode.appendChild(document.createTextNode('РБНЛИ'))"></div>
+    <b>РБНЛИ №1</b>
+    <span>Республиканский бурятский национальный лицей-интернат</span>
+  </aside>
 </section>
 
 <!-- ФУНДАМЕНТ / КОРНИ -->
