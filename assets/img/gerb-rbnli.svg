@@ -1,0 +1,58 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Эмблема РБНЛИ №1 — Республиканский бурятский национальный лицей-интернат">
+  <defs>
+    <radialGradient id="rbnliFld" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#2a5c88"/>
+      <stop offset="100%" stop-color="#122740"/>
+    </radialGradient>
+    <linearGradient id="rbnliAu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#efd89b"/>
+      <stop offset="52%" stop-color="#d3b061"/>
+      <stop offset="100%" stop-color="#a97f33"/>
+    </linearGradient>
+  </defs>
+
+  <!-- поле + кольца -->
+  <circle cx="120" cy="120" r="117" fill="url(#rbnliFld)"/>
+  <circle cx="120" cy="120" r="117" fill="none" stroke="url(#rbnliAu)" stroke-width="5"/>
+  <circle cx="120" cy="120" r="107" fill="none" stroke="url(#rbnliAu)" stroke-width="1.5" opacity="0.55"/>
+
+  <!-- восходящее солнце с лучами -->
+  <g stroke="url(#rbnliAu)" stroke-width="3.4" stroke-linecap="round">
+    <path d="M120 66V49"/>
+    <path d="M103 70 95 56"/>
+    <path d="M137 70 145 56"/>
+    <path d="M89 80 76 71"/>
+    <path d="M151 80 164 71"/>
+  </g>
+  <path d="M98 99a22 22 0 0 1 44 0Z" fill="url(#rbnliAu)"/>
+
+  <!-- раскрытая книга -->
+  <path d="M120 128C104 120 86 119 70 125V166C86 160 104 161 120 169 136 161 154 160 170 166V125C154 119 136 120 120 128Z"
+        fill="#f4ecd6" stroke="url(#rbnliAu)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M120 128V169" stroke="url(#rbnliAu)" stroke-width="3" stroke-linecap="round"/>
+  <g stroke="#c39a4c" stroke-width="1.5" opacity="0.6" fill="none" stroke-linecap="round">
+    <path d="M84 135c10-2 20-2 29 1"/>
+    <path d="M83 145c10-2 21-2 30 1"/>
+    <path d="M83 155c10-2 21-2 30 1"/>
+    <path d="M127 136c10-3 20-3 29-1"/>
+    <path d="M127 146c10-3 21-3 30-1"/>
+    <path d="M127 156c10-3 21-3 30-1"/>
+  </g>
+
+  <!-- лавровый венок -->
+  <g fill="none" stroke="url(#rbnliAu)" stroke-width="3" stroke-linecap="round">
+    <path d="M120 210C98 208 80 197 71 176"/>
+    <path d="M120 210C142 208 160 197 169 176"/>
+  </g>
+  <g fill="url(#rbnliAu)">
+    <ellipse cx="99" cy="203" rx="7" ry="3.4" transform="rotate(28 99 203)"/>
+    <ellipse cx="88" cy="196" rx="7" ry="3.4" transform="rotate(40 88 196)"/>
+    <ellipse cx="80" cy="187" rx="7" ry="3.4" transform="rotate(52 80 187)"/>
+    <ellipse cx="74" cy="177" rx="6.5" ry="3.2" transform="rotate(64 74 177)"/>
+    <ellipse cx="141" cy="203" rx="7" ry="3.4" transform="rotate(-28 141 203)"/>
+    <ellipse cx="152" cy="196" rx="7" ry="3.4" transform="rotate(-40 152 196)"/>
+    <ellipse cx="160" cy="187" rx="7" ry="3.4" transform="rotate(-52 160 187)"/>
+    <ellipse cx="166" cy="177" rx="6.5" ry="3.2" transform="rotate(-64 166 177)"/>
+  </g>
+  <circle cx="120" cy="212" r="3.2" fill="url(#rbnliAu)"/>
+</svg>
