@@ -61,7 +61,13 @@
   // Защита страницы кабинета: нет сессии → на страницу входа
   function requireAuth(loginUrl) {
     return currentUser().then(function (u) {
-      if (!u) { location.replace(loginUrl || "vhod.html"); return null; }
+      if (!u) {
+        var base = loginUrl || "vhod.html";
+        var here = location.pathname.split("/").pop() + location.search + location.hash;
+        var sep = base.indexOf("?") >= 0 ? "&" : "?";
+        location.replace(base + sep + "next=" + encodeURIComponent(here));
+        return null;
+      }
       return u;
     });
   }

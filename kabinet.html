@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Личный кабинет · Буян</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="assets/app.css?v=3">
+<link rel="stylesheet" href="assets/app.css?v=4">
 </head>
 <body>
 <header class="app-header">
@@ -143,7 +143,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase-config.js?v=2"></script>
-<script src="assets/auth.js?v=2"></script>
+<script src="assets/auth.js?v=3"></script>
 <script>
 (function () {
   var A = window.BuyanAuth;
@@ -154,6 +154,8 @@
 
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function fmtDate(d){ if(!d) return "—"; var p=String(d).split("-"); return p.length===3 ? p[2]+"."+p[1]+"."+p[0] : d; }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function addDaysISO(base,n){ var d=new Date(base+"T12:00:00Z"); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 
   // Защита + шапка/профиль
   A.requireAuth("vhod.html").then(function (u) {
@@ -247,7 +249,7 @@
     var el=$("jobsList");
     var list = allJobs.filter(function(j){ return jobFilter==="all" || j.kind===jobFilter; });
     if (!list.length){ el.innerHTML='<p class="muted">'+(allJobs.length?"В этой категории пусто.":"Пока нет вакансий — разместите первую.")+'</p>'; return; }
-    var today = new Date().toISOString().slice(0,10);
+    var today = todayISO();
     el.innerHTML = list.map(function(j){
       var expired = j.expires_at && j.expires_at < today;
       var resp = respByJob[j.id] || [];
@@ -256,7 +258,8 @@
       var term = j.expires_at
         ? '<span class="jterm'+(expired?" exp":"")+'">'+(expired?"истёк ":"до ")+fmtDate(j.expires_at)+'</span>' : '';
       var act;
-      if (own) act='<span class="pill">ваша · '+resp.length+' откл.</span>';
+      if (own) act='<span class="pill">ваша · '+resp.length+' откл.</span>'
+        + '<div class="jobcard__acts"><button type="button" class="lnk" data-extend="'+j.id+'">Продлить +30 дн.</button><button type="button" class="lnk lnk--del" data-del="'+j.id+'">Удалить</button></div>';
       else if (iResp) act='<span class="pill" style="color:var(--gold-2);border-color:var(--gold-deep)">отклик отправлен</span>';
       else if (expired) act='<span class="pill">неактивна</span>';
       else act='<button class="btn btn--ghost" data-respond="'+j.id+'" style="padding:.4rem .8rem;font-size:.8rem">Откликнуться</button>';
@@ -318,6 +321,34 @@
     });
   });
 
+  // Продлить / удалить свою вакансию (делегирование)
+  document.addEventListener("click", function(e){
+    if (!sb || !uid) return;
+    var ext = e.target.closest ? e.target.closest("[data-extend]") : null;
+    if (ext){
+      var eid = ext.getAttribute("data-extend");
+      var j = allJobs.filter(function(x){ return x.id===eid; })[0];
+      var base = (j && j.expires_at && j.expires_at > todayISO()) ? j.expires_at : todayISO();
+      ext.disabled = true; ext.textContent = "…";
+      sb.from("jobs").update({ expires_at: addDaysISO(base, 30) }).eq("id", eid).then(function(r){
+        if (r.error){ ext.disabled=false; ext.textContent="Продлить +30 дн."; alert("Не удалось: "+r.error.message); }
+        else loadJobs();
+      });
+      return;
+    }
+    var del = e.target.closest ? e.target.closest("[data-del]") : null;
+    if (del){
+      if (!window.confirm("Удалить эту вакансию? Отклики на неё тоже удалятся.")) return;
+      var did = del.getAttribute("data-del");
+      del.disabled = true; del.textContent = "…";
+      sb.from("jobs").delete().eq("id", did).then(function(r){
+        if (r.error){ del.disabled=false; del.textContent="Удалить"; alert("Не удалось: "+r.error.message); }
+        else loadJobs();
+      });
+      return;
+    }
+  });
+
   // Добавить сделку
   var df = $("dealForm");
   if (df) df.addEventListener("submit", function(e){
@@ -342,9 +373,7 @@
     e.preventDefault();
     if (!sb || !uid){ return; }
     var msg=$("jobMsg"); msg.textContent="Сохраняю…";
-    var days = parseInt($("jo-term").value,10) || 30;
-    var d = new Date(); d.setDate(d.getDate()+days);
-    var expISO = d.toISOString().slice(0,10);
+    var expISO = addDaysISO(todayISO(), parseInt($("jo-term").value,10) || 30);
     sb.from("jobs").insert({
       title: $("jo-title").value.trim(),
       kind: $("jo-kind").value,
@@ -370,14 +399,20 @@
 
   // Переключение разделов
   var links = document.querySelectorAll("#nav a");
+  function showSection(sec){
+    var found = false;
+    links.forEach(function (x) { var on = x.getAttribute("data-sec")===sec; x.classList.toggle("on", on); if(on) found=true; });
+    if(!found) return false;
+    document.querySelectorAll(".kab-sec").forEach(function (s) { s.classList.toggle("on", s.id === "sec-" + sec); });
+    window.scrollTo(0, 0);
+    return true;
+  }
   links.forEach(function (a) {
-    a.addEventListener("click", function () {
-      var sec = a.getAttribute("data-sec");
-      links.forEach(function (x) { x.classList.toggle("on", x === a); });
-      document.querySelectorAll(".kab-sec").forEach(function (s) { s.classList.toggle("on", s.id === "sec-" + sec); });
-      window.scrollTo(0, 0);
-    });
+    a.addEventListener("click", function () { showSection(a.getAttribute("data-sec")); });
   });
+  // Глубокая ссылка: kabinet.html#jobs открывает нужный раздел
+  if (location.hash) showSection(location.hash.replace(/^#/, ""));
+  window.addEventListener("hashchange", function(){ if(location.hash) showSection(location.hash.replace(/^#/,"")); });
 
   $("logout").addEventListener("click", function () {
     Promise.resolve(A.signOut()).then(function () { location.href = "vhod.html"; });

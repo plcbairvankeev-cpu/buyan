@@ -51,12 +51,20 @@
 <!-- supabase-js (нужен интернет). Если недоступен — работает демо-режим. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase-config.js?v=2"></script>
-<script src="assets/auth.js?v=2"></script>
+<script src="assets/auth.js?v=3"></script>
 <script>
 (function () {
   var A = window.BuyanAuth;
   var mode = "in"; // in | up
   var $ = function (id) { return document.getElementById(id); };
+  // Куда вести после входа: ?next=<файл>.html[#раздел] (только относительные, без открытого редиректа)
+  function dest(){
+    try {
+      var p = new URLSearchParams(location.search).get("next");
+      if (p && /^[\w.\-]+\.html(#[\w\-]+)?$/.test(p)) return p;
+    } catch (e) {}
+    return "kabinet.html";
+  }
   var err = $("err"), ok = $("ok");
   function showErr(m){ err.textContent = m; err.classList.add("on"); ok.classList.remove("on"); }
   function showOk(m){ ok.textContent = m; ok.classList.add("on"); err.classList.remove("on"); }
@@ -65,7 +73,7 @@
   // Демо-режим, если Supabase не настроен
   if (!A.isConfigured()) {
     $("demoNotice").style.display = "block";
-    $("demoBtn").addEventListener("click", function () { A.demoLogin(); location.href = "kabinet.html"; });
+    $("demoBtn").addEventListener("click", function () { A.demoLogin(); location.href = dest(); });
   }
 
   function setMode(m) {
@@ -93,12 +101,12 @@
         var hasSession = res && res.data && res.data.session;
         if (!hasSession) { showOk("Заявка принята. Проверьте почту и подтвердите регистрацию, затем войдите."); setMode("in"); return; }
       }
-      location.href = "kabinet.html";
+      location.href = dest();
     }).catch(function (ex) { btn.disabled = false; showErr(ex.message || "Ошибка"); });
   });
 
   // Уже вошли — сразу в кабинет
-  A.currentUser().then(function (u) { if (u) location.replace("kabinet.html"); });
+  A.currentUser().then(function (u) { if (u) location.replace(dest()); });
 
   function translate(m) {
     if (/Invalid login/i.test(m)) return "Неверный e-mail или пароль.";
