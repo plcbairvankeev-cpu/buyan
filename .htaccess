@@ -1,0 +1,13 @@
+# Кэширование: HTML/CSS/JS всегда проверяются на свежесть (no-cache),
+# чтобы обновления сайта появлялись у посетителей сразу.
+# Картинки/шрифты можно держать в кэше неделю.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|json)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header unset Expires
+    Header unset Pragma
+  </FilesMatch>
+  <FilesMatch "\.(png|jpe?g|gif|svg|webp|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>
