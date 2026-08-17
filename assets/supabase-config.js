@@ -9,6 +9,6 @@
    (можно посмотреть кабинет без реального входа).
    ===================================================================== */
 window.SUPABASE = {
-  url:     "https://YOUR-PROJECT.supabase.co",   // ← Project URL
-  anonKey: "YOUR-ANON-PUBLIC-KEY",               // ← anon public key
+  url:     "https://huxvdtsqgcipxfvzygcd.supabase.co",              // Project URL
+  anonKey: "sb_publishable_h6C7HZ5_88xdkXPQ-3gieQ_GOD0-lCc",        // publishable (клиентский) ключ — публичный, безопасно
 };
