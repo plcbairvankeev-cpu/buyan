@@ -1,0 +1,36 @@
+<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Промышленное оборудование">
+  <defs>
+    <linearGradient id="bgI" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f7fa"/>
+      <stop offset="1" stop-color="#e6ecf2"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="220" fill="url(#bgI)"/>
+  <g stroke="#d4dbe3" stroke-width="1">
+    <line x1="0" y1="184" x2="400" y2="184"/>
+    <line x1="60" y1="184" x2="40" y2="212"/>
+    <line x1="150" y1="184" x2="140" y2="212"/>
+    <line x1="250" y1="184" x2="272" y2="212"/>
+    <line x1="350" y1="184" x2="382" y2="212"/>
+  </g>
+  <!-- gantry -->
+  <rect x="70" y="58" width="150" height="16" rx="4" fill="#1f5c8b"/>
+  <rect x="78" y="74" width="12" height="34" rx="2" fill="#17456a"/>
+  <rect x="200" y="74" width="12" height="34" rx="2" fill="#17456a"/>
+  <!-- spindle head -->
+  <rect x="132" y="70" width="28" height="20" rx="3" fill="#17456a"/>
+  <rect x="142" y="90" width="8" height="26" rx="2" fill="#1f5c8b"/>
+  <path d="M146 116 v10" stroke="#17456a" stroke-width="3" stroke-linecap="round"/>
+  <!-- table/base -->
+  <rect x="64" y="150" width="164" height="34" rx="4" fill="#1f5c8b" opacity="0.10"/>
+  <rect x="64" y="150" width="164" height="34" rx="4" fill="none" stroke="#1f5c8b" stroke-width="2.4"/>
+  <rect x="110" y="134" width="70" height="16" rx="2" fill="#1f5c8b" opacity="0.45"/>
+  <circle cx="216" cy="160" r="3" fill="#1f5c8b"/>
+  <circle cx="216" cy="172" r="3" fill="#1f5c8b" opacity="0.4"/>
+  <!-- gears -->
+  <circle cx="300" cy="118" r="24" fill="none" stroke="#1f5c8b" stroke-width="9" stroke-dasharray="7 8"/>
+  <circle cx="300" cy="118" r="12" fill="none" stroke="#1f5c8b" stroke-width="3"/>
+  <circle cx="300" cy="118" r="3.5" fill="#1f5c8b"/>
+  <circle cx="337" cy="155" r="16" fill="none" stroke="#17456a" stroke-width="7" stroke-dasharray="6 7"/>
+  <circle cx="337" cy="155" r="6" fill="none" stroke="#17456a" stroke-width="2.5"/>
+</svg>

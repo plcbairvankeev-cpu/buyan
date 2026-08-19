@@ -213,8 +213,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
 
 /* ---------- Ниши (чёткое разделение) ---------- */
 .niches { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
-.niche { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; }
+.niche { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; overflow: hidden; }
 .niche__ico { width: 40px; height: 40px; color: var(--accent); margin-bottom: 14px; }
+.niche__cover { margin: -28px -28px 20px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.niche__cover img { display: block; width: 100%; height: auto; }
 .niche h3 { font-size: 1.25rem; margin: .4rem 0 .5rem; }
 .niche > p { color: var(--ink-2); font-size: .95rem; margin: 0 0 auto; }
 .niche__links { display: grid; gap: 10px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
