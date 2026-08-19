@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Личный кабинет · Буян</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="assets/app.css?v=4">
+<link rel="stylesheet" href="assets/app.css?v=5">
 </head>
 <body>
 <header class="app-header">
@@ -134,6 +134,7 @@
           <button type="button" data-jf="all" class="on">Все</button>
           <button type="button" data-jf="Вакансия">Вакансии</button>
           <button type="button" data-jf="Подработка">Подработки</button>
+          <label class="jobtoggle"><input type="checkbox" id="jobHideExp" checked> Скрыть истёкшие</label>
         </div>
         <div id="jobsList"><p class="muted">Загрузка…</p></div>
       </section>
@@ -247,10 +248,18 @@
 
   function renderJobs(){
     var el=$("jobsList");
-    var list = allJobs.filter(function(j){ return jobFilter==="all" || j.kind===jobFilter; });
-    if (!list.length){ el.innerHTML='<p class="muted">'+(allJobs.length?"В этой категории пусто.":"Пока нет вакансий — разместите первую.")+'</p>'; return; }
     var today = todayISO();
-    el.innerHTML = list.map(function(j){
+    var hideExp = !$("jobHideExp") || $("jobHideExp").checked;
+    var byKind = allJobs.filter(function(j){ return jobFilter==="all" || j.kind===jobFilter; });
+    var hiddenExp = 0;
+    var list = byKind.filter(function(j){
+      var exp = j.expires_at && j.expires_at < today;
+      if (hideExp && exp){ hiddenExp++; return false; }
+      return true;
+    });
+    var note = hiddenExp ? '<p class="muted" style="font-size:.82rem;margin:2px 0 14px">Скрыто истёкших: '+hiddenExp+'. <button type="button" class="lnk" id="showExp" style="font-size:.82rem">Показать</button></p>' : '';
+    if (!list.length){ el.innerHTML=note+'<p class="muted">'+(allJobs.length?"В этой категории пусто.":"Пока нет вакансий — разместите первую.")+'</p>'; return; }
+    el.innerHTML = note + list.map(function(j){
       var expired = j.expires_at && j.expires_at < today;
       var resp = respByJob[j.id] || [];
       var own  = j.author_id===uid;
@@ -295,6 +304,12 @@
     jobFilter = b.getAttribute("data-jf");
     jfil.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
     renderJobs();
+  });
+  // Тумблер «Скрыть истёкшие» + ссылка «Показать» в подписи
+  var hideChk = $("jobHideExp");
+  if (hideChk) hideChk.addEventListener("change", renderJobs);
+  document.addEventListener("click", function(e){
+    if (e.target && e.target.id === "showExp" && hideChk){ hideChk.checked = false; renderJobs(); }
   });
 
   // Записаться на событие (делегирование)
