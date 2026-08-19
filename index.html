@@ -215,7 +215,7 @@ img.brand__mark{object-fit:contain}
 
 /* Курсы валют к рублю */
 .rates-strip{padding:18px 0;border-bottom:1px solid var(--line);background:var(--panel)}
-.rates{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.rates{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
 .rate{background:var(--ink);padding:14px 16px}
 .rate__k{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2)}
 .rate__row{display:flex;align-items:baseline;gap:8px;margin-top:5px;flex-wrap:wrap}
@@ -476,6 +476,7 @@ img.brand__mark{object-fit:contain}
       <div class="rate" data-rate="btc"><span class="rate__k">Bitcoin</span><span class="rate__row"><span class="rate__v">…</span><span class="rate__c"></span></span></div>
       <div class="rate" data-rate="usdt"><span class="rate__k">USDT</span><span class="rate__row"><span class="rate__v">…</span><span class="rate__c"></span></span></div>
       <div class="rate" data-rate="usd"><span class="rate__k">Доллар · USD</span><span class="rate__row"><span class="rate__v">…</span></span></div>
+      <div class="rate" data-rate="eur"><span class="rate__k">Евро · EUR</span><span class="rate__row"><span class="rate__v">…</span></span></div>
       <div class="rate" data-rate="cny"><span class="rate__k">Юань · CNY</span><span class="rate__row"><span class="rate__v">…</span></span></div>
       <div class="rate" data-rate="mnt"><span class="rate__k">Тугрик ×1000</span><span class="rate__row"><span class="rate__v">…</span></span></div>
     </div>
@@ -1061,8 +1062,9 @@ window.SITE_CONFIG = {
       }).catch(function(){});
     fetch('https://open.er-api.com/v6/latest/USD')
       .then(function(r){return r.json();}).then(function(d){
-        if(!d||!d.rates) return; var rub=d.rates.RUB, cny=d.rates.CNY, mnt=d.rates.MNT;
+        if(!d||!d.rates) return; var rub=d.rates.RUB, eur=d.rates.EUR, cny=d.rates.CNY, mnt=d.rates.MNT;
         setV('usd',rub,2);
+        if(eur) setV('eur',rub/eur,2);
         if(cny) setV('cny',rub/cny,2);
         if(mnt) setV('mnt',rub/mnt*1000,2);
       }).catch(function(){});
