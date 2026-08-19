@@ -144,14 +144,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase-config.js?v=2"></script>
-<script src="assets/auth.js?v=3"></script>
+<script src="assets/auth.js?v=4"></script>
 <script>
 (function () {
   var A = window.BuyanAuth;
   var sb = A.getClient ? A.getClient() : null;   // supabase-клиент (null в демо/без настройки)
   var $ = function (id) { return document.getElementById(id); };
-  var uid = null, myEmail = null;
+  var uid = null, myEmail = null, loggingOut = false;
   var allJobs = [], respByJob = {}, jobFilter = "all";
+
+  // Если сессия умрёт, пока вкладка открыта — не показываем «пустой» кабинет,
+  // а сразу ведём на вход (с возвратом на текущий раздел).
+  if (sb && sb.auth && sb.auth.onAuthStateChange) {
+    sb.auth.onAuthStateChange(function (event) {
+      if (event === "SIGNED_OUT" && !loggingOut) {
+        location.replace("vhod.html?next=" + encodeURIComponent(location.pathname.split("/").pop() + location.hash));
+      }
+    });
+  }
 
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function fmtDate(d){ if(!d) return "—"; var p=String(d).split("-"); return p.length===3 ? p[2]+"."+p[1]+"."+p[0] : d; }
@@ -430,6 +440,7 @@
   window.addEventListener("hashchange", function(){ if(location.hash) showSection(location.hash.replace(/^#/,"")); });
 
   $("logout").addEventListener("click", function () {
+    loggingOut = true;
     Promise.resolve(A.signOut()).then(function () { location.href = "vhod.html"; });
   });
 })();

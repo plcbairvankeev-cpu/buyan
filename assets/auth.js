@@ -47,15 +47,17 @@
   }
 
   // Текущий пользователь: {email, demo} | null  (async)
+  // Используем getUser() — он проверяет токен на сервере и при необходимости
+  // обновляет его. Если сессия мертва, вернётся null (а не устаревший кэш),
+  // и кабинет отправит на повторный вход вместо «пустого» экрана.
+  function demoOrNull() { return demoActive() ? { email: "Демо-участник", demo: true } : null; }
   function currentUser() {
     var c = client();
-    if (c) {
-      return c.auth.getSession().then(function (r) {
-        var s = r && r.data && r.data.session;
-        return s ? { email: s.user.email, demo: false } : (demoActive() ? { email: "Демо-участник", demo: true } : null);
-      });
-    }
-    return Promise.resolve(demoActive() ? { email: "Демо-участник", demo: true } : null);
+    if (!c) return Promise.resolve(demoOrNull());
+    return c.auth.getUser().then(function (r) {
+      var u = r && r.data && r.data.user;
+      return (u && !r.error) ? { email: u.email, demo: false } : demoOrNull();
+    }).catch(function () { return demoOrNull(); });
   }
 
   // Защита страницы кабинета: нет сессии → на страницу входа
