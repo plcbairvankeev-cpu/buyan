@@ -9,7 +9,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Deploy via FTP
+
+      - name: Deploy via FTP (попытка 1)
+        id: d1
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -17,6 +20,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
+          timeout: 120000
           local-dir: ./
           server-dir: /public_html/
           exclude: |
@@ -26,3 +30,65 @@ jobs:
             **/*.zip
             **/README.md
             **/.DS_Store
+
+      - name: Пауза перед повтором 2
+        if: steps.d1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Deploy via FTP (попытка 2)
+        id: d2
+        if: steps.d1.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          timeout: 120000
+          local-dir: ./
+          server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            **/*.zip
+            **/README.md
+            **/.DS_Store
+
+      - name: Пауза перед повтором 3
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        run: sleep 45
+
+      - name: Deploy via FTP (попытка 3)
+        id: d3
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          timeout: 120000
+          local-dir: ./
+          server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            **/*.zip
+            **/README.md
+            **/.DS_Store
+
+      - name: Итог деплоя
+        if: always()
+        run: |
+          if [ "${{ steps.d1.outcome }}" = "success" ] || [ "${{ steps.d2.outcome }}" = "success" ] || [ "${{ steps.d3.outcome }}" = "success" ]; then
+            echo "✅ Деплой удался."
+          else
+            echo "❌ Все 3 попытки FTP-загрузки не удались."
+            exit 1
+          fi
